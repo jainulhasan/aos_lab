@@ -1,38 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <string.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
 
-void list_directory(const char *path, int show_hidden, int long_format, int recursive) {
+void listFiles(const char *path, int showHidden, int recursive, int longFormat) {
     DIR *dir;
     struct dirent *entry;
-    struct stat file_info;
+    struct stat statbuf;
 
-    if ((dir = opendir(path)) == NULL) {
+    dir = opendir(path);
+
+    if (dir == NULL) {
         perror("opendir");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    if (!recursive)
-        printf("Directory: %s\n", path);
+    while ((entry = readdir(dir))) {
+        char fullpath[1024]; // Adjust the buffer size as needed
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
 
-    while ((entry = readdir(dir)) != NULL) {
-        if (!show_hidden && entry->d_name[0] == '.')
-            continue;
-
-        char full_path[1024];
-        snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
-
-        if (lstat(full_path, &file_info) == -1) {
-            perror("lstat");
-            exit(1);
+        if (!showHidden && entry->d_name[0] == '.') {
+            continue; // Skip hidden files and directories
         }
 
-        if (long_format) {
+        if (stat(fullpath, &statbuf) == -1) {
+            perror("stat");
+            exit(EXIT_FAILURE);
+        }
+
+        if (S_ISDIR(statbuf.st_mode)) {
+            if (recursive && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                printf("%s/\n", fullpath);
+                listFiles(fullpath, showHidden, recursive, longFormat);
+            }
+        } else {
+            if (long_format) {
             struct passwd *pw = getpwuid(file_info.st_uid);
             struct group *gr = getgrgid(file_info.st_gid);
             struct tm *tm_info = localtime(&file_info.st_mtime);
@@ -49,13 +55,9 @@ void list_directory(const char *path, int show_hidden, int long_format, int recu
                    tm_info->tm_hour,
                    tm_info->tm_min,
                    entry->d_name);
-        } 
-        else {
-            printf("%s\n", entry->d_name);
-        // }
-
-        if (recursive && S_ISDIR(file_info.st_mode) && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-            list_directory(full_path, show_hidden, long_format, recursive);
+        }  else {
+                printf("%s\n", fullpath);
+            }
         }
     }
 
@@ -63,29 +65,31 @@ void list_directory(const char *path, int show_hidden, int long_format, int recu
 }
 
 int main(int argc, char *argv[]) {
-    int show_hidden = 0;
-    int long_format = 0;
-    int recursive = 0;
-    char *directory = ".";
+    const char *path = "."; // Default to current directory
+    int showHidden = 0;     // Do not show hidden files by default
+    int recursive = 0;      // Do not list recursively by default
+    int longFormat = 0;     // Do not use long format by default
 
-    // Check command-line arguments
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-a") == 0) {
-            show_hidden = 1;
-        } else if (strcmp(argv[i], "-l") == 0) {
-            long_format = 1;
-        } else if (strcmp(argv[i], "-R") == 0) {
-            recursive = 1;
-        } else if (argv[i][0] != '-') {
-            // If not an option, assume it's a directory
-            directory = argv[i];
-        } else {
-            fprintf(stderr, "Unknown option: %s\n", argv[i]);
-            exit(1);
+    if (argc > 1) {
+        if (argv[1][0] != '-') {
+            // If the first argument doesn't start with '-', treat it as the directory name.
+            path = argv[1];
+            argv++;
+            argc--;
+        }
+
+        for (int i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "-l") == 0) {
+                longFormat = 1;
+            } else if (strcmp(argv[i], "-a") == 0) {
+                showHidden = 1;
+            } else if (strcmp(argv[i], "-R") == 0) {
+                recursive = 1;
+            }
         }
     }
 
-    list_directory(directory, show_hidden, long_format, recursive);
+    listFiles(path, showHidden, recursive, longFormat);
 
     return 0;
 }

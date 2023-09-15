@@ -2,6 +2,13 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
+    // if (argc == 1) {
+    //     // No file specified, read from standard input and display
+    //     char c;
+    //     while ((c = getchar()) != EOF) {
+    //         putchar(c);
+    //     }
+    // }
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <file1> [<file2> ...]\n", argv[0]);
         exit(EXIT_FAILURE);
@@ -14,7 +21,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        int ch;
+        char ch;
         while ((ch = fgetc(file)) != EOF) {
             putchar(ch);
         }

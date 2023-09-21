@@ -10,7 +10,7 @@ void count_wc(const char *filename, int count_chars, int count_lines, int count_
     }
 
     int char_count = 0;
-    int line_count = 1;
+    int line_count = 0;
     int word_count = 0;
     int in_word = 0;
     int ch;
@@ -55,7 +55,7 @@ void count_wc(const char *filename, int count_chars, int count_lines, int count_
 
 int main(int argc, char *argv[]) {
     int count_chars = 0;
-    int count_lines = 1;
+    int count_lines = 0;
     int count_words = 0;
 
     if (argc < 2) {
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
             count_words = 1;
         } else {
             // Assume it's a filename
-            count_wc(argv[i], count_chars, count_lines, count_words);
+            count_wc(argv[i], 1, 1, 1);
         }
     }
 

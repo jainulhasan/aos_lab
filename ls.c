@@ -37,7 +37,8 @@ void listFiles(const char *path, int showHidden, int recursive, int longFormat) 
                 printf("%s/\n", fullpath);
                 listFiles(fullpath, showHidden, recursive, longFormat);
             }
-        } else {
+        } 
+        else {
             if (long_format) {
             struct passwd *pw = getpwuid(file_info.st_uid);
             struct group *gr = getgrgid(file_info.st_gid);
@@ -55,7 +56,8 @@ void listFiles(const char *path, int showHidden, int recursive, int longFormat) 
                    tm_info->tm_hour,
                    tm_info->tm_min,
                    entry->d_name);
-        }  else {
+        }
+          else {
                 printf("%s\n", fullpath);
             }
         }

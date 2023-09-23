@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+int total_char=0;
+int total_words=0;
+int total_lines=0;
 void count_wc(const char *filename, int count_chars, int count_lines, int count_words) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -34,21 +36,21 @@ void count_wc(const char *filename, int count_chars, int count_lines, int count_
         }
     }
 
-    // Increment word count for the last word if necessary
     if (count_words && in_word) {
         word_count++;
     }
-
     fclose(file);
 
-    // Print counts based on options
-    if (count_chars) {
+    if (count_chars){
+        total_char+=char_count; 
         printf("Characters in %s: %d\n", filename, char_count);
     }
     if (count_lines) {
+        total_lines+=count_lines;
         printf("Lines in %s: %d\n", filename, line_count);
     }
     if (count_words) {
+	total_words+=count_words;
         printf("Words in %s: %d\n", filename, word_count);
     }
 }
@@ -63,7 +65,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // Check for optional options
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-c") == 0) {
             count_chars = 1;
@@ -72,10 +73,11 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-w") == 0) {
             count_words = 1;
         } else {
-            // Assume it's a filename
-            count_wc(argv[i], 1, 1, 1);
+            count_wc(argv[i],1,1,1);
         }
     }
-
+    printf("\n total char :- %d\n",total_char);
+    printf("total lines :- %d\n",total_lines);
+    printf("total words :- %d\n",total_words);
     return 0;
 }

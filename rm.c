@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++){
         if (remove(argv[i]) == 0) {
             printf("Removed file: %s\n", argv[i]);
         } else {
